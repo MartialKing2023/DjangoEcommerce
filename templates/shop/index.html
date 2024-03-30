@@ -1,0 +1,105 @@
+{% extends "shop/base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <form class="card card-md">
+            <div class="card-body row no-gutters align-items-center">
+                <div class="col">
+                    <input type="search" name="item-name" class="form-control form-control-borderless" placeholder="Entrez le nom du produit que vous cherchez">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-success">Recherche</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    {% for product in product_object %}
+    <div class="col-md-3">
+        <div class="card">
+            <img src="{{ product.image }}" alt="{{ product.title }}" class="class-img-top">
+            <div class="card-body">
+                <div id="title{{ product.id }}" class="card-title">{{ product.title }}</div>
+                <div class="card-text" style="color: orange;">{{ product.price }} F CFA</div>
+                <a href="{{ product.id }}" class="btn btn-warning">Voir</a>
+                <button class="btn btn-success ajouter" id="{{ product.id }}">Ajouter</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-3 offset-md-4">
+        <ul class="pagination">
+            {% if product_object.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ product_object.previous_page_number }}">Precedent</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <a class="page-link" href="?page={{ product_object.number }}">{{ product_object.number }}</a>
+            </li>
+
+            {% if product_object.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ product_object.next_page_number }}">Suivant</a>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block js %}
+
+<script type="text/javascript">
+
+    if(localStorage.getItem('panier') == null){
+        var panier = {};
+    } else {
+        panier = JSON.parse(localStorage.getItem('panier'));
+    }
+
+    $(document).on('click', '.ajouter', function(){
+        var item_id = this.id.toString();
+        console.log(item_id);
+
+        if(panier[item_id] != undefined) {
+            panier[item_id] += 1;
+        } else {
+            panier[item_id] = 1;
+        }
+        
+        console.log(panier);
+        localStorage.setItem('panier', JSON.stringify(panier));
+
+        var valeurPanier = document.getElementById('valeurPanier');
+        valeurPanier.innerHTML = Object.keys(panier).length;
+    });
+
+    AfficherList(panier);  // Appel de la fonction
+
+    function AfficherList(panier) {
+        var panierString = "";
+        panierString += "<h5>Voici votre liste</h5>";
+        var index = 1;
+        for(var x in panier) {
+            panierString += index + "- ";
+            panierString += document.getElementById("title"+x).innerHTML + "; Qte: " + panier[x] + "</br>";
+            index += 1;
+        }
+        $(function () {
+            $('[data-bs-toggle="popover"]').popover();
+            document.getElementById('panier').setAttribute('data-bs-content', panierString);
+        });
+    }
+</script>
+
+{% endblock %}
