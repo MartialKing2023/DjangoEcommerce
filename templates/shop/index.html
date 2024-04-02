@@ -24,7 +24,7 @@
             <img src="{{ product.image }}" alt="{{ product.title }}" class="class-img-top">
             <div class="card-body">
                 <div id="title{{ product.id }}" class="card-title">{{ product.title }}</div>
-                <div class="card-text" style="color: orange;">{{ product.price }} F CFA</div>
+                <div class="card-text" id="price{{ product.id }}" style="color: orange;">{{ product.price }}</div>
                 <a href="{{ product.id }}" class="btn btn-warning">Voir</a>
                 <button class="btn btn-success ajouter" id="{{ product.id }}">Ajouter</button>
             </div>
@@ -72,9 +72,16 @@
         console.log(item_id);
 
         if(panier[item_id] != undefined) {
-            panier[item_id] += 1;
+            quantite = panier[item_id][0] + 1;
+            panier[item_id][0] = quantite;
+            panier[item_id][2] += parseFloat(document.getElementById('price'+item_id).innerHTML);
+            console.log(panier[item_id][0], panier[item_id][0]);
         } else {
-            panier[item_id] = 1;
+            quantite = 1;
+            prix = parseFloat(document.getElementById("price"+item_id).innerHTML);
+            nom = document.getElementById("title"+item_id).innerHTML;
+            console.log(prix)
+            panier[item_id] = [quantite, nom, prix];
         }
         
         console.log(panier);
@@ -84,17 +91,20 @@
         valeurPanier.innerHTML = Object.keys(panier).length;
     });
 
-    AfficherList(panier);  // Appel de la fonction
+    AfficherList(panier);  // Appel de la fonction "AfficherList"
 
     function AfficherList(panier) {
-        var panierString = "";
+        var panierString = " ";
         panierString += "<h5>Voici votre liste</h5>";
         var index = 1;
         for(var x in panier) {
             panierString += index + "- ";
-            panierString += document.getElementById("title"+x).innerHTML + "; Qte: " + panier[x] + "</br>";
+            panierString += document.getElementById("title"+x).innerHTML + "; Qte: " + panier[x][0] + "</br>";
             index += 1;
         }
+
+        panierString += "<a href='/checkout' class='btn btn-primary'>Checkout</a>";
+        
         $(function () {
             $('[data-bs-toggle="popover"]').popover();
             document.getElementById('panier').setAttribute('data-bs-content', panierString);
